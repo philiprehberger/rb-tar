@@ -59,13 +59,33 @@ end
 
 ## API
 
+### `Philiprehberger::Tar`
+
 | Method | Description |
 |--------|-------------|
-| `.create(output_path) { \|t\| }` | Create a tar archive |
-| `.extract(input_path, to: dir)` | Extract archive to directory |
-| `.list(input_path)` | List archive entries |
-| `Writer#add_file(path, name:)` | Add a file from disk |
-| `Writer#add_string(name, content, mode:)` | Add a file from a string |
+| `.create(output_path) { \|writer\| }` | Create a tar archive; yields a `Writer` instance |
+| `.extract(input_path, to:)` | Extract all entries to the given directory |
+| `.list(input_path)` | Return an array of entry hashes (`:name`, `:size`, `:mode`) |
+| `Error` | Custom error class raised on invalid paths or missing directories |
+
+### `Philiprehberger::Tar::Writer`
+
+| Method | Description |
+|--------|-------------|
+| `BLOCK_SIZE` | Archive block size constant (`512`) |
+| `#initialize(io)` | Wrap a writable IO stream for tar output |
+| `#add_file(path, name:)` | Add a file from disk; `name` defaults to the basename |
+| `#add_string(name, content, mode:)` | Add a file from a string; `mode` defaults to `0644` |
+| `#close` | Write the two-block end-of-archive marker |
+
+### `Philiprehberger::Tar::Reader`
+
+| Method | Description |
+|--------|-------------|
+| `BLOCK_SIZE` | Archive block size constant (`512`) |
+| `#initialize(io)` | Wrap a readable IO stream for tar input |
+| `#each_entry { \|entry\| }` | Yield each entry hash (`:name`, `:size`, `:mode`, `:content`); returns an array if no block given |
+| `#list` | Return an array of entry metadata hashes (`:name`, `:size`, `:mode`) without reading content |
 
 ## Development
 
