@@ -64,7 +64,7 @@ module Philiprehberger
         write_field(header, 263, 2, '00')
 
         checksum = header.bytes.sum
-        write_field(header, 148, 8, format('%06o', checksum) + "\0 ")
+        write_field(header, 148, 8, "#{format('%06o', checksum)}\u0000 ")
 
         header
       end

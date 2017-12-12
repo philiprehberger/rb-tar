@@ -34,13 +34,16 @@ module Philiprehberger
         reader.each_entry do |entry|
           dest = File.join(to, entry[:name])
 
-          raise Error, "path traversal detected: #{entry[:name]}" if dest.start_with?('..') || entry[:name].include?('..')
+          if dest.start_with?('..') || entry[:name].include?('..')
+            raise Error,
+                  "path traversal detected: #{entry[:name]}"
+          end
 
           dir = File.dirname(dest)
-          FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
+          FileUtils.mkdir_p(dir)
 
           File.binwrite(dest, entry[:content])
-          File.chmod(entry[:mode], dest) if entry[:mode] > 0
+          File.chmod(entry[:mode], dest) if entry[:mode].positive?
         end
       end
     end
