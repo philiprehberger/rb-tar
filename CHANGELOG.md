@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-28
+
+### Added
+- Gzip compression integration with `create_gz`, `extract_gz`, and `list_gz` methods
+- File filtering with glob patterns via `include:` and `exclude:` options on `create` and `create_gz`
+- Symbolic link support with `Writer#add_symlink` and automatic symlink detection in `Writer#add_file`
+- Incremental tar creation with `newer_than:` option to only add files modified after a reference time
+- Progress callbacks via `on_progress:` option on `create`, `extract`, `create_gz`, and `extract_gz`
+
+### Changed
+- `Reader#list` now includes `:typeflag` and `:linkname` keys in entry hashes
+- `Reader#each_entry` now includes `:typeflag` and `:linkname` keys in entry hashes
+- `Writer#entry_count` tracks the number of entries written
+
 ## [0.1.3] - 2026-03-24
 
 ### Changed
