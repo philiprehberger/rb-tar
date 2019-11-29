@@ -1,6 +1,8 @@
 # philiprehberger-tar
 
-[![Tests](https://github.com/philiprehberger/rb-tar/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rb-tar/actions/workflows/ci.yml) [![Gem Version](https://img.shields.io/gem/v/philiprehberger-tar)](https://rubygems.org/gems/philiprehberger-tar) [![GitHub release](https://img.shields.io/github/v/release/philiprehberger/rb-tar)](https://github.com/philiprehberger/rb-tar/releases) [![GitHub last commit](https://img.shields.io/github/last-commit/philiprehberger/rb-tar)](https://github.com/philiprehberger/rb-tar/commits/main) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Bug Reports](https://img.shields.io/badge/bug-reports-red.svg)](https://github.com/philiprehberger/rb-tar/issues) [![Feature Requests](https://img.shields.io/badge/feature-requests-blue.svg)](https://github.com/philiprehberger/rb-tar/issues) [![GitHub Sponsors](https://img.shields.io/badge/sponsor-philiprehberger-ea4aaa.svg?logo=github)](https://github.com/sponsors/philiprehberger)
+[![Tests](https://github.com/philiprehberger/rb-tar/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rb-tar/actions/workflows/ci.yml)
+[![Gem Version](https://badge.fury.io/rb/philiprehberger-tar.svg)](https://rubygems.org/gems/philiprehberger-tar)
+[![Last updated](https://img.shields.io/github/last-commit/philiprehberger/rb-tar)](https://github.com/philiprehberger/rb-tar/commits/main)
 
 Pure-Ruby tar archive creation, extraction, and gzip compression with filtering, symlink support, and progress callbacks.
 
@@ -151,8 +153,22 @@ bundle exec rubocop
 
 ## Support
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Philip%20Rehberger-blue?logo=linkedin)](https://linkedin.com/in/philiprehberger) [![More Packages](https://img.shields.io/badge/more-packages-blue.svg)](https://github.com/philiprehberger?tab=repositories)
+If you find this project useful:
+
+⭐ [Star the repo](https://github.com/philiprehberger/rb-tar)
+
+🐛 [Report issues](https://github.com/philiprehberger/rb-tar/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+
+💡 [Suggest features](https://github.com/philiprehberger/rb-tar/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+
+❤️ [Sponsor development](https://github.com/sponsors/philiprehberger)
+
+🌐 [All Open Source Projects](https://philiprehberger.com/open-source-packages)
+
+💻 [GitHub Profile](https://github.com/philiprehberger)
+
+🔗 [LinkedIn Profile](https://www.linkedin.com/in/philiprehberger)
 
 ## License
 
-MIT
+[MIT](LICENSE)
