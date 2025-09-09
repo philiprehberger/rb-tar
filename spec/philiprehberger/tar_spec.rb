@@ -1020,4 +1020,72 @@ RSpec.describe Philiprehberger::Tar do
       end
     end
   end
+
+  describe 'checksum validation' do
+    it 'reads a valid archive without error' do
+      Dir.mktmpdir do |dir|
+        tar_path = File.join(dir, 'valid.tar')
+        described_class.create(tar_path) do |t|
+          t.add_string('hello.txt', 'hello')
+        end
+
+        entries = described_class.list(tar_path)
+        expect(entries.size).to eq(1)
+        expect(entries.first[:name]).to eq('hello.txt')
+      end
+    end
+
+    it 'raises Error on a corrupt header' do
+      Dir.mktmpdir do |dir|
+        tar_path = File.join(dir, 'corrupt.tar')
+        described_class.create(tar_path) do |t|
+          t.add_string('hello.txt', 'hello')
+        end
+
+        data = File.binread(tar_path)
+        data.setbyte(0, (data.getbyte(0) + 1) % 256)
+        File.binwrite(tar_path, data)
+
+        expect { described_class.list(tar_path) }.to raise_error(
+          Philiprehberger::Tar::Error, /invalid tar header checksum/
+        )
+      end
+    end
+
+    it 'includes expected and actual checksum in error message' do
+      Dir.mktmpdir do |dir|
+        tar_path = File.join(dir, 'corrupt2.tar')
+        described_class.create(tar_path) do |t|
+          t.add_string('test.txt', 'data')
+        end
+
+        data = File.binread(tar_path)
+        data.setbyte(10, (data.getbyte(10) + 1) % 256)
+        File.binwrite(tar_path, data)
+
+        expect { described_class.list(tar_path) }.to raise_error(
+          Philiprehberger::Tar::Error, /expected \d+, got \d+/
+        )
+      end
+    end
+
+    it 'validates checksum on each_entry as well' do
+      Dir.mktmpdir do |dir|
+        tar_path = File.join(dir, 'corrupt3.tar')
+        described_class.create(tar_path) do |t|
+          t.add_string('a.txt', 'aaa')
+        end
+
+        data = File.binread(tar_path)
+        data.setbyte(5, (data.getbyte(5) + 1) % 256)
+        File.binwrite(tar_path, data)
+
+        expect do
+          File.open(tar_path, 'rb') do |io|
+            Philiprehberger::Tar::Reader.new(io).each_entry { |_e| }
+          end
+        end.to raise_error(Philiprehberger::Tar::Error, /invalid tar header checksum/)
+      end
+    end
+  end
 end

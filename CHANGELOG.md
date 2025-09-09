@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-12
+
+### Added
+- Header checksum validation in Reader — corrupt or malformed tar headers now raise `Error`
+
+### Fixed
+- Writer now computes header checksums per POSIX standard (checksum field treated as spaces)
+- Add gem-version field and fix ruby-version required in bug report template
+- Add alternatives field to feature request template
+- Add basic usage example before subsections in README
+
 ## [0.2.3] - 2026-04-08
 
 ### Changed
