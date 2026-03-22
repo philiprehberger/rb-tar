@@ -1,0 +1,96 @@
+# frozen_string_literal: true
+
+module Philiprehberger
+  module Tar
+    # Reads and extracts tar archives.
+    class Reader
+      BLOCK_SIZE = 512
+
+      # @param io [IO] the input stream
+      def initialize(io)
+        @io = io
+      end
+
+      # Iterate over each entry in the archive.
+      #
+      # @yield [Hash] entry info with :name, :size, :mode, :content keys
+      # @return [Array<Hash>] entries if no block given
+      def each_entry(&block)
+        entries = []
+
+        loop do
+          header = @io.read(BLOCK_SIZE)
+          break if header.nil? || header.bytesize < BLOCK_SIZE
+          break if header == "\0" * BLOCK_SIZE
+
+          entry = parse_header(header)
+          break if entry[:name].empty?
+
+          content = read_content(entry[:size])
+          entry[:content] = content
+
+          if block
+            block.call(entry)
+          else
+            entries << entry
+          end
+        end
+
+        entries unless block
+      end
+
+      # List all entries without reading content.
+      #
+      # @return [Array<Hash>] entry info hashes with :name, :size, :mode keys
+      def list
+        result = []
+
+        loop do
+          header = @io.read(BLOCK_SIZE)
+          break if header.nil? || header.bytesize < BLOCK_SIZE
+          break if header == "\0" * BLOCK_SIZE
+
+          entry = parse_header(header)
+          break if entry[:name].empty?
+
+          result << { name: entry[:name], size: entry[:size], mode: entry[:mode] }
+          skip_content(entry[:size])
+        end
+
+        result
+      end
+
+      private
+
+      def parse_header(header)
+        name = read_field(header, 0, 100)
+        mode = read_field(header, 100, 8).to_i(8)
+        size = read_field(header, 124, 12).to_i(8)
+        typeflag = header.byteslice(156, 1)
+
+        { name: name, size: size, mode: mode, typeflag: typeflag }
+      end
+
+      def read_field(header, offset, length)
+        field = header.byteslice(offset, length)
+        field.delete("\0").strip
+      end
+
+      def read_content(size)
+        return ''.b if size <= 0
+
+        content = @io.read(size)
+        padding = BLOCK_SIZE - (size % BLOCK_SIZE)
+        @io.read(padding) if padding < BLOCK_SIZE
+        content
+      end
+
+      def skip_content(size)
+        return if size <= 0
+
+        blocks = (size + BLOCK_SIZE - 1) / BLOCK_SIZE
+        @io.read(blocks * BLOCK_SIZE)
+      end
+    end
+  end
+end
