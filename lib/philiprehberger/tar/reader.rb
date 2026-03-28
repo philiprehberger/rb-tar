@@ -13,7 +13,7 @@ module Philiprehberger
 
       # Iterate over each entry in the archive.
       #
-      # @yield [Hash] entry info with :name, :size, :mode, :content keys
+      # @yield [Hash] entry info with :name, :size, :mode, :typeflag, :linkname, :content keys
       # @return [Array<Hash>] entries if no block given
       def each_entry(&block)
         entries = []
@@ -26,8 +26,13 @@ module Philiprehberger
           entry = parse_header(header)
           break if entry[:name].empty?
 
-          content = read_content(entry[:size])
-          entry[:content] = content
+          if entry[:typeflag] == '2'
+            # Symlink entry has no content
+            entry[:content] = ''
+          else
+            content = read_content(entry[:size])
+            entry[:content] = content
+          end
 
           if block
             block.call(entry)
@@ -41,7 +46,7 @@ module Philiprehberger
 
       # List all entries without reading content.
       #
-      # @return [Array<Hash>] entry info hashes with :name, :size, :mode keys
+      # @return [Array<Hash>] entry info hashes with :name, :size, :mode, :typeflag, :linkname keys
       def list
         result = []
 
@@ -53,8 +58,9 @@ module Philiprehberger
           entry = parse_header(header)
           break if entry[:name].empty?
 
-          result << { name: entry[:name], size: entry[:size], mode: entry[:mode] }
-          skip_content(entry[:size])
+          result << { name: entry[:name], size: entry[:size], mode: entry[:mode],
+                      typeflag: entry[:typeflag], linkname: entry[:linkname] }
+          skip_content(entry[:size]) unless entry[:typeflag] == '2'
         end
 
         result
@@ -67,8 +73,9 @@ module Philiprehberger
         mode = read_field(header, 100, 8).to_i(8)
         size = read_field(header, 124, 12).to_i(8)
         typeflag = header.byteslice(156, 1)
+        linkname = read_field(header, 157, 100)
 
-        { name: name, size: size, mode: mode, typeflag: typeflag }
+        { name: name, size: size, mode: mode, typeflag: typeflag, linkname: linkname }
       end
 
       def read_field(header, offset, length)

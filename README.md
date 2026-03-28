@@ -1,11 +1,8 @@
 # philiprehberger-tar
 
-[![Tests](https://github.com/philiprehberger/rb-tar/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rb-tar/actions/workflows/ci.yml)
-[![Gem Version](https://badge.fury.io/rb/philiprehberger-tar.svg)](https://rubygems.org/gems/philiprehberger-tar)
-[![License](https://img.shields.io/github/license/philiprehberger/rb-tar)](LICENSE)
-[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
+[![Tests](https://github.com/philiprehberger/rb-tar/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rb-tar/actions/workflows/ci.yml) [![Gem Version](https://img.shields.io/gem/v/philiprehberger-tar)](https://rubygems.org/gems/philiprehberger-tar) [![GitHub release](https://img.shields.io/github/v/release/philiprehberger/rb-tar)](https://github.com/philiprehberger/rb-tar/releases) [![GitHub last commit](https://img.shields.io/github/last-commit/philiprehberger/rb-tar)](https://github.com/philiprehberger/rb-tar/commits/main) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Bug Reports](https://img.shields.io/badge/bug-reports-red.svg)](https://github.com/philiprehberger/rb-tar/issues) [![Feature Requests](https://img.shields.io/badge/feature-requests-blue.svg)](https://github.com/philiprehberger/rb-tar/issues) [![GitHub Sponsors](https://img.shields.io/badge/sponsor-philiprehberger-ea4aaa.svg?logo=github)](https://github.com/sponsors/philiprehberger)
 
-Pure-Ruby tar archive creation and extraction
+Pure-Ruby tar archive creation, extraction, and gzip compression with filtering, symlink support, and progress callbacks.
 
 ## Requirements
 
@@ -27,66 +24,122 @@ gem install philiprehberger-tar
 
 ## Usage
 
+### Creating Archives
+
 ```ruby
 require "philiprehberger/tar"
 
-Philiprehberger::Tar.create('archive.tar') do |t|
-  t.add_file('config.yml')
-  t.add_string('hello.txt', 'Hello, world!', mode: 0644)
+Philiprehberger::Tar.create("archive.tar") do |t|
+  t.add_file("config.yml")
+  t.add_string("hello.txt", "Hello, world!", mode: 0o644)
 end
 ```
 
 ### Extracting Archives
 
 ```ruby
-Philiprehberger::Tar.extract('archive.tar', to: '/tmp/output')
+Philiprehberger::Tar.extract("archive.tar", to: "/tmp/output")
 ```
 
 ### Listing Contents
 
 ```ruby
-entries = Philiprehberger::Tar.list('archive.tar')
-# => [{ name: 'config.yml', size: 128, mode: 420 }, ...]
+entries = Philiprehberger::Tar.list("archive.tar")
+# => [{ name: "config.yml", size: 128, mode: 420, typeflag: "0", linkname: "" }, ...]
 ```
 
-### Adding Files from Strings
+### Gzip Compression
 
 ```ruby
-Philiprehberger::Tar.create('data.tar') do |t|
-  t.add_string('readme.txt', 'This is the readme', mode: 0644)
-  t.add_string('data.json', '{"key": "value"}', mode: 0644)
+# Create a .tar.gz archive
+Philiprehberger::Tar.create_gz("archive.tar.gz") do |t|
+  t.add_file("config.yml")
+  t.add_string("data.json", '{"key": "value"}')
 end
+
+# Extract a .tar.gz archive
+Philiprehberger::Tar.extract_gz("archive.tar.gz", to: "/tmp/output")
+
+# List contents of a .tar.gz archive
+entries = Philiprehberger::Tar.list_gz("archive.tar.gz")
+```
+
+### File Filtering
+
+```ruby
+# Include only Ruby files
+Philiprehberger::Tar.create("code.tar", include: "*.rb") do |t|
+  t.add_string("app.rb", "puts 'hello'")
+  t.add_string("readme.md", "# Docs")  # excluded
+end
+
+# Exclude test files
+Philiprehberger::Tar.create("src.tar", exclude: "test/**") do |t|
+  t.add_string("lib/app.rb", "code")
+  t.add_string("test/app_test.rb", "test")  # excluded
+end
+
+# Combine include and exclude
+Philiprehberger::Tar.create("filtered.tar", include: "*.rb", exclude: "test_*.rb") do |t|
+  t.add_string("app.rb", "code")
+  t.add_string("test_app.rb", "test")  # excluded
+end
+```
+
+### Symbolic Links
+
+```ruby
+Philiprehberger::Tar.create("links.tar") do |t|
+  t.add_string("target.txt", "real content")
+  t.add_symlink("link.txt", target: "target.txt")
+end
+```
+
+### Incremental Archives
+
+```ruby
+# Only add files modified in the last hour
+cutoff = Time.now - 3600
+Philiprehberger::Tar.create("recent.tar", newer_than: cutoff) do |t|
+  t.add_file("old_file.txt")   # skipped if not modified recently
+  t.add_file("new_file.txt")   # included if modified after cutoff
+end
+```
+
+### Progress Callbacks
+
+```ruby
+Philiprehberger::Tar.create("big.tar", on_progress: ->(name, index, total) {
+  puts "#{index}/#{total}: #{name}"
+}) do |t|
+  t.add_string("a.txt", "aaa", total: 2)
+  t.add_string("b.txt", "bbb", total: 2)
+end
+
+# Progress on extraction
+Philiprehberger::Tar.extract("big.tar", to: "/tmp/out", on_progress: ->(name, index, _total) {
+  puts "Extracted: #{name} (#{index})"
+})
 ```
 
 ## API
 
-### `Philiprehberger::Tar`
-
 | Method | Description |
 |--------|-------------|
-| `.create(output_path) { \|writer\| }` | Create a tar archive; yields a `Writer` instance |
-| `.extract(input_path, to:)` | Extract all entries to the given directory |
-| `.list(input_path)` | Return an array of entry hashes (`:name`, `:size`, `:mode`) |
-| `Error` | Custom error class raised on invalid paths or missing directories |
-
-### `Philiprehberger::Tar::Writer`
-
-| Method | Description |
-|--------|-------------|
-| `BLOCK_SIZE` | Archive block size constant (`512`) |
-| `#initialize(io)` | Wrap a writable IO stream for tar output |
-| `#add_file(path, name:)` | Add a file from disk; `name` defaults to the basename |
-| `#add_string(name, content, mode:)` | Add a file from a string; `mode` defaults to `0644` |
-| `#close` | Write the two-block end-of-archive marker |
-
-### `Philiprehberger::Tar::Reader`
-
-| Method | Description |
-|--------|-------------|
-| `BLOCK_SIZE` | Archive block size constant (`512`) |
-| `#initialize(io)` | Wrap a readable IO stream for tar input |
-| `#each_entry { \|entry\| }` | Yield each entry hash (`:name`, `:size`, `:mode`, `:content`); returns an array if no block given |
-| `#list` | Return an array of entry metadata hashes (`:name`, `:size`, `:mode`) without reading content |
+| `.create(path, include:, exclude:, newer_than:, on_progress:) { \|w\| }` | Create a tar archive with optional filtering and progress |
+| `.create_gz(path, include:, exclude:, newer_than:, on_progress:) { \|w\| }` | Create a gzip-compressed tar archive |
+| `.extract(path, to:, on_progress:)` | Extract a tar archive to a directory |
+| `.extract_gz(path, to:, on_progress:)` | Extract a gzip-compressed tar archive |
+| `.list(path)` | List entries in a tar archive |
+| `.list_gz(path)` | List entries in a gzip-compressed tar archive |
+| `Writer#add_file(path, name:)` | Add a file from disk (auto-detects symlinks) |
+| `Writer#add_string(name, content, mode:)` | Add a file from a string |
+| `Writer#add_symlink(name, target:)` | Add a symbolic link entry |
+| `Writer#close` | Write the end-of-archive marker |
+| `Writer#entry_count` | Number of entries written so far |
+| `Reader#each_entry { \|e\| }` | Iterate entries with `:name`, `:size`, `:mode`, `:typeflag`, `:linkname`, `:content` |
+| `Reader#list` | List entry metadata without reading content |
+| `Error` | Raised on invalid paths or missing directories |
 
 ## Development
 
@@ -95,6 +148,10 @@ bundle install
 bundle exec rspec
 bundle exec rubocop
 ```
+
+## Support
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Philip%20Rehberger-blue?logo=linkedin)](https://linkedin.com/in/philiprehberger) [![More Packages](https://img.shields.io/badge/more-packages-blue.svg)](https://github.com/philiprehberger?tab=repositories)
 
 ## License
 
