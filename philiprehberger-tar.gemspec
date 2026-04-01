@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
 
   spec.summary = 'Pure-Ruby tar archive creation and extraction'
   spec.description = 'Pure-Ruby implementation of tar archive creation and extraction using the standard ' \
-                       '512-byte block format. Supports adding files from disk or strings, extracting archives, ' \
-                       'and listing archive contents without external dependencies.'
+                     '512-byte block format. Supports adding files from disk or strings, extracting archives, ' \
+                     'and listing archive contents without external dependencies.'
   spec.homepage = 'https://philiprehberger.com/open-source-packages/ruby/philiprehberger-tar'
   spec.license = 'MIT'
 
