@@ -74,6 +74,17 @@ Philiprehberger::Tar.extract_gz("archive.tar.gz", to: "/tmp/output")
 entries = Philiprehberger::Tar.list_gz("archive.tar.gz")
 ```
 
+### Find Entry
+
+```ruby
+# Find a specific entry in a tar archive
+content = Philiprehberger::Tar.find_entry("archive.tar", "config.yml")
+# => "key: value" or nil if not found
+
+# Find a specific entry in a .tar.gz archive
+content = Philiprehberger::Tar.find_entry_gz("archive.tar.gz", "config.yml")
+```
+
 ### File Filtering
 
 ```ruby
@@ -142,6 +153,8 @@ Philiprehberger::Tar.extract("big.tar", to: "/tmp/out", on_progress: ->(name, in
 | `.extract_gz(path, to:, on_progress:)` | Extract a gzip-compressed tar archive |
 | `.list(path)` | List entries in a tar archive |
 | `.list_gz(path)` | List entries in a gzip-compressed tar archive |
+| `.find_entry(path, name)` | Find an entry by name and return its content (or nil) |
+| `.find_entry_gz(path, name)` | Find an entry by name in a gzip-compressed archive |
 | `Writer#add_file(path, name:)` | Add a file from disk (auto-detects symlinks) |
 | `Writer#add_string(name, content, mode:)` | Add a file from a string |
 | `Writer#add_symlink(name, target:)` | Add a symbolic link entry |

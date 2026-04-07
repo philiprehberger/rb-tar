@@ -110,6 +110,45 @@ module Philiprehberger
       end
     end
 
+    # Find an entry by name in a tar archive and return its content.
+    #
+    # @param input_path [String] path to the tar file
+    # @param name [String] entry name to search for
+    # @return [String, nil] entry content or nil if not found
+    def self.find_entry(input_path, name)
+      File.open(input_path, 'rb') do |io|
+        find_entry_in_io(io, name)
+      end
+    end
+
+    # Find an entry by name in a gzip-compressed tar archive and return its content.
+    #
+    # @param input_path [String] path to the .tar.gz file
+    # @param name [String] entry name to search for
+    # @return [String, nil] entry content or nil if not found
+    def self.find_entry_gz(input_path, name)
+      File.open(input_path, 'rb') do |file_io|
+        gz = Zlib::GzipReader.new(file_io)
+        result = find_entry_in_io(gz, name)
+        gz.close
+        result
+      end
+    end
+
+    # Internal: search for an entry by name in an IO-like object.
+    #
+    # @param io [IO] the input stream
+    # @param name [String] entry name to search for
+    # @return [String, nil] entry content or nil if not found
+    def self.find_entry_in_io(io, name)
+      reader = Reader.new(io)
+      reader.each_entry do |entry|
+        return entry[:content] if entry[:name] == name
+      end
+      nil
+    end
+    private_class_method :find_entry_in_io
+
     # Internal: extract entries from an IO-like object.
     #
     # @param io [IO] the input stream
