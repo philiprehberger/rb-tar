@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ['Philip Rehberger']
   spec.email = ['me@philiprehberger.com']
 
-  spec.summary = 'Pure-Ruby tar archive creation and extraction'
+  spec.summary = 'Pure-Ruby tar archive creation, extraction, and gzip compression with filtering, symlink support, and progress callbacks'
   spec.description = 'Pure-Ruby implementation of tar archive creation and extraction using the standard ' \
                      '512-byte block format. Supports adding files from disk or strings, extracting archives, ' \
                      'and listing archive contents without external dependencies.'

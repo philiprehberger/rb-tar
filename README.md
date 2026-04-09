@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/philiprehberger-tar.svg)](https://rubygems.org/gems/philiprehberger-tar)
 [![Last updated](https://img.shields.io/github/last-commit/philiprehberger/rb-tar)](https://github.com/philiprehberger/rb-tar/commits/main)
 
-Pure-Ruby tar archive creation, extraction, and gzip compression with filtering, symlink support, and progress callbacks.
+Pure-Ruby tar archive creation, extraction, and gzip compression with filtering, symlink support, and progress callbacks
 
 ## Requirements
 
