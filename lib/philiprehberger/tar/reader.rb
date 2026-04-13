@@ -69,6 +69,8 @@ module Philiprehberger
       private
 
       def parse_header(header)
+        validate_checksum!(header)
+
         name = read_field(header, 0, 100)
         mode = read_field(header, 100, 8).to_i(8)
         size = read_field(header, 124, 12).to_i(8)
@@ -76,6 +78,17 @@ module Philiprehberger
         linkname = read_field(header, 157, 100)
 
         { name: name, size: size, mode: mode, typeflag: typeflag, linkname: linkname }
+      end
+
+      def validate_checksum!(header)
+        stored = read_field(header, 148, 8).to_i(8)
+        computed = 0
+        header.each_byte.with_index do |byte, i|
+          computed += i >= 148 && i < 156 ? 0x20 : byte
+        end
+        return if stored == computed
+
+        raise Error, "invalid tar header checksum (expected #{computed}, got #{stored})"
       end
 
       def read_field(header, offset, length)

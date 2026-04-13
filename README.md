@@ -26,6 +26,14 @@ gem install philiprehberger-tar
 
 ## Usage
 
+```ruby
+require "philiprehberger/tar"
+
+Philiprehberger::Tar.create("archive.tar") do |t|
+  t.add_string("hello.txt", "Hello, world!")
+end
+```
+
 ### Creating Archives
 
 ```ruby

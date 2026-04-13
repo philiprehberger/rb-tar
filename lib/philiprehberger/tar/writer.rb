@@ -98,6 +98,8 @@ module Philiprehberger
         write_field(header, 257, 6, 'ustar')
         write_field(header, 263, 2, '00')
 
+        # POSIX: checksum is computed with the checksum field treated as spaces
+        8.times { |i| header.setbyte(148 + i, 0x20) }
         checksum = header.bytes.sum
         write_field(header, 148, 8, "#{format('%06o', checksum)}\u0000 ")
 
