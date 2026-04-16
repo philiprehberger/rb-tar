@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-15
+
+### Added
+- `find_entry(input_path, name)` method to search a tar archive for an entry by name and return its content
+- `find_entry_gz(input_path, name)` method to search a gzipped tar archive for an entry by name and return its content
+
 ## [0.3.0] - 2026-04-12
 
 ### Added

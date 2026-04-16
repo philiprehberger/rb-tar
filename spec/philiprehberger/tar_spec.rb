@@ -1021,6 +1021,64 @@ RSpec.describe Philiprehberger::Tar do
     end
   end
 
+  describe '.find_entry' do
+    it 'returns the content of a matching entry' do
+      Dir.mktmpdir do |dir|
+        tar_path = File.join(dir, 'test.tar')
+
+        described_class.create(tar_path) do |t|
+          t.add_string('hello.txt', 'Hello, world!')
+          t.add_string('data.bin', 'binary data')
+        end
+
+        result = described_class.find_entry(tar_path, 'data.bin')
+        expect(result).to eq('binary data')
+      end
+    end
+
+    it 'returns nil when the entry is not found' do
+      Dir.mktmpdir do |dir|
+        tar_path = File.join(dir, 'test.tar')
+
+        described_class.create(tar_path) do |t|
+          t.add_string('hello.txt', 'Hello, world!')
+        end
+
+        result = described_class.find_entry(tar_path, 'missing.txt')
+        expect(result).to be_nil
+      end
+    end
+  end
+
+  describe '.find_entry_gz' do
+    it 'returns the content of a matching entry in a gzipped archive' do
+      Dir.mktmpdir do |dir|
+        gz_path = File.join(dir, 'test.tar.gz')
+
+        described_class.create_gz(gz_path) do |t|
+          t.add_string('config.yml', 'key: value')
+          t.add_string('readme.md', '# Hello')
+        end
+
+        result = described_class.find_entry_gz(gz_path, 'config.yml')
+        expect(result).to eq('key: value')
+      end
+    end
+
+    it 'returns nil when the entry is not found in a gzipped archive' do
+      Dir.mktmpdir do |dir|
+        gz_path = File.join(dir, 'test.tar.gz')
+
+        described_class.create_gz(gz_path) do |t|
+          t.add_string('hello.txt', 'Hello!')
+        end
+
+        result = described_class.find_entry_gz(gz_path, 'missing.txt')
+        expect(result).to be_nil
+      end
+    end
+  end
+
   describe 'checksum validation' do
     it 'reads a valid archive without error' do
       Dir.mktmpdir do |dir|
