@@ -1079,6 +1079,66 @@ RSpec.describe Philiprehberger::Tar do
     end
   end
 
+  describe '.entry?' do
+    it 'returns true when the entry is present' do
+      Dir.mktmpdir do |dir|
+        tar_path = File.join(dir, 'test.tar')
+        described_class.create(tar_path) do |t|
+          t.add_string('config.yml', 'key: value')
+          t.add_string('data.bin', 'binary')
+        end
+
+        expect(described_class.entry?(tar_path, 'config.yml')).to be true
+        expect(described_class.entry?(tar_path, 'data.bin')).to be true
+      end
+    end
+
+    it 'returns false when the entry is missing' do
+      Dir.mktmpdir do |dir|
+        tar_path = File.join(dir, 'test.tar')
+        described_class.create(tar_path) do |t|
+          t.add_string('config.yml', 'key: value')
+        end
+
+        expect(described_class.entry?(tar_path, 'missing.txt')).to be false
+      end
+    end
+
+    it 'returns false for an empty archive' do
+      Dir.mktmpdir do |dir|
+        tar_path = File.join(dir, 'empty.tar')
+        described_class.create(tar_path) { |_t| }
+
+        expect(described_class.entry?(tar_path, 'anything.txt')).to be false
+      end
+    end
+  end
+
+  describe '.entry_gz?' do
+    it 'returns true when the entry is present in a gzipped archive' do
+      Dir.mktmpdir do |dir|
+        gz_path = File.join(dir, 'test.tar.gz')
+        described_class.create_gz(gz_path) do |t|
+          t.add_string('app.rb', 'puts :hi')
+          t.add_string('readme.md', '# hi')
+        end
+
+        expect(described_class.entry_gz?(gz_path, 'app.rb')).to be true
+      end
+    end
+
+    it 'returns false when the entry is missing from a gzipped archive' do
+      Dir.mktmpdir do |dir|
+        gz_path = File.join(dir, 'test.tar.gz')
+        described_class.create_gz(gz_path) do |t|
+          t.add_string('app.rb', 'puts :hi')
+        end
+
+        expect(described_class.entry_gz?(gz_path, 'missing.rb')).to be false
+      end
+    end
+  end
+
   describe 'checksum validation' do
     it 'reads a valid archive without error' do
       Dir.mktmpdir do |dir|

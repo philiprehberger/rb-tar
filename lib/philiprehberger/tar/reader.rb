@@ -44,6 +44,28 @@ module Philiprehberger
         entries unless block
       end
 
+      # Check whether the archive contains an entry with the given name,
+      # without reading entry content.
+      #
+      # @param name [String] the entry name to search for
+      # @return [Boolean] true if the entry exists in the archive
+      def entry?(name)
+        loop do
+          header = @io.read(BLOCK_SIZE)
+          break if header.nil? || header.bytesize < BLOCK_SIZE
+          break if header == "\0" * BLOCK_SIZE
+
+          entry = parse_header(header)
+          break if entry[:name].empty?
+
+          return true if entry[:name] == name
+
+          skip_content(entry[:size]) unless entry[:typeflag] == '2'
+        end
+
+        false
+      end
+
       # List all entries without reading content.
       #
       # @return [Array<Hash>] entry info hashes with :name, :size, :mode, :typeflag, :linkname keys

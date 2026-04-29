@@ -85,6 +85,16 @@ content = Philiprehberger::Tar.find_entry("archive.tar", "config.yml")
 content = Philiprehberger::Tar.find_entry_gz("archive.tar.gz", "config.yml")
 ```
 
+### Entry Existence
+
+Predicate variants that return a boolean and skip entry content while
+scanning the headers — cheaper than `find_entry` when only existence matters:
+
+```ruby
+Philiprehberger::Tar.entry?("archive.tar", "config.yml")           # => true / false
+Philiprehberger::Tar.entry_gz?("archive.tar.gz", "config.yml")     # => true / false
+```
+
 ### File Filtering
 
 ```ruby
@@ -155,6 +165,8 @@ Philiprehberger::Tar.extract("big.tar", to: "/tmp/out", on_progress: ->(name, in
 | `.list_gz(path)` | List entries in a gzip-compressed tar archive |
 | `.find_entry(path, name)` | Find an entry by name and return its content (or nil) |
 | `.find_entry_gz(path, name)` | Find an entry by name in a gzip-compressed archive |
+| `.entry?(path, name)` | Predicate: does the tar archive contain `name`? Skips content reads |
+| `.entry_gz?(path, name)` | Predicate: does the gzipped archive contain `name`? Skips content reads |
 | `Writer#add_file(path, name:)` | Add a file from disk (auto-detects symlinks) |
 | `Writer#add_string(name, content, mode:)` | Add a file from a string |
 | `Writer#add_symlink(name, target:)` | Add a symbolic link entry |

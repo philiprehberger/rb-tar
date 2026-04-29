@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-04-28
+
+### Added
+- `Tar.entry?(path, name)` and `Tar.entry_gz?(path, name)` — boolean predicates for "does this archive contain an entry called name". Skip entry content while scanning headers, so they are cheaper than `find_entry` when only existence matters.
+
 ## [0.4.0] - 2026-04-15
 
 ### Added

@@ -135,6 +135,35 @@ module Philiprehberger
       end
     end
 
+    # Check whether a tar archive contains an entry with the given name.
+    #
+    # Skips entry content while scanning headers, so this is cheaper than
+    # {.find_entry} when only existence matters.
+    #
+    # @param input_path [String] path to the tar file
+    # @param name [String] entry name to look up
+    # @return [Boolean] true if the archive contains the entry
+    def self.entry?(input_path, name)
+      File.open(input_path, 'rb') do |io|
+        Reader.new(io).entry?(name)
+      end
+    end
+
+    # Check whether a gzip-compressed tar archive contains an entry with the
+    # given name.
+    #
+    # @param input_path [String] path to the .tar.gz file
+    # @param name [String] entry name to look up
+    # @return [Boolean] true if the archive contains the entry
+    def self.entry_gz?(input_path, name)
+      File.open(input_path, 'rb') do |file_io|
+        gz = Zlib::GzipReader.new(file_io)
+        result = Reader.new(gz).entry?(name)
+        gz.close
+        result
+      end
+    end
+
     # Internal: search for an entry by name in an IO-like object.
     #
     # @param io [IO] the input stream
